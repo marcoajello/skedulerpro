@@ -1,0 +1,345 @@
+// Electron Integration
+// Initializes Electron-specific features when running in Electron
+// VERSION: 2025-11-30-v2
+
+(function() {
+  'use strict';
+  
+  console.log('[ElectronInit] Loading version 2025-11-30-v2');
+  
+  // Only run in Electron
+  if (typeof window.isElectron === 'undefined' || !window.isElectron) {
+    console.log('[ElectronInit] Not running in Electron, skipping initialization');
+    return;
+  }
+  
+  console.log('[ElectronInit] Initializing Electron integration...');
+  
+  // Wait for DOM and other scripts to load
+  document.addEventListener('DOMContentLoaded', async () => {
+    const efm = window.ElectronFileManager;
+    if (!efm) {
+      console.error('[ElectronInit] ElectronFileManager not found');
+      return;
+    }
+    
+    // Restore current file from previous session
+    if (efm.restoreCurrentFile()) {
+      console.log('[ElectronInit] Restored current file:', efm.currentFileName);
+      // Update window title
+      if (window.electronAPI?.window?.setTitle) {
+        window.electronAPI.window.setTitle(efm.currentFileName);
+      }
+    }
+    
+    // Get app info
+    const appInfo = await window.electronAPI.app.getInfo();
+    console.log('[ElectronInit] App info:', appInfo);
+    
+    // Handle email confirmation deep link
+    if (window.electronAPI.onEmailConfirmed) {
+      window.electronAPI.onEmailConfirmed(() => {
+        console.log('[ElectronInit] Email confirmed via deep link');
+        alert('Email confirmed! You can now sign in.');
+      });
+    }
+    
+    // Skip auth UI in Electron - always start with app visible
+    const authUI = document.getElementById('authUI');
+    const mainApp = document.getElementById('mainApp');
+    
+    if (authUI) authUI.style.display = 'none';
+    if (mainApp) mainApp.style.display = 'block';
+    
+    // Update auth status display based on actual auth state
+    function updateElectronAuthStatus() {
+      const authStatus = document.getElementById('authStatus');
+      const signOutBtn = document.getElementById('signOutBtn');
+      
+      if (!authStatus || !signOutBtn) return;
+      
+      const user = window.SupabaseAPI?.auth?.getCurrentUser?.();
+      const isPro = window.SupabaseAPI?.subscription?.isPro?.() || false;
+      const tier = isPro ? 'PRO' : 'FREE';
+      
+      // Toggle pro-user class on body for print watermark
+      document.body.classList.toggle('pro-user', isPro);
+      
+      if (user) {
+        authStatus.textContent = `${user.email} (${tier})`;
+        authStatus.style.display = 'inline-block';
+        signOutBtn.textContent = 'Sign Out';
+        signOutBtn.style.display = 'inline-block';
+      } else {
+        authStatus.textContent = 'FREE';
+        authStatus.style.display = 'inline-block';
+        signOutBtn.textContent = 'Sign In';
+        signOutBtn.style.display = 'inline-block';
+      }
+    }
+    
+    // Handle sign in/out click
+    const signOutBtn = document.getElementById('signOutBtn');
+    if (signOutBtn) {
+      signOutBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const btnText = signOutBtn.textContent.trim().toLowerCase();
+        console.log('[ElectronInit] Sign button clicked, text:', btnText);
+        
+        // Check button text to determine action
+        if (btnText === 'sign out') {
+          console.log('[ElectronInit] Signing out...');
+          try {
+            const result = await window.SupabaseAPI?.auth?.signOut?.();
+            console.log('[ElectronInit] Sign out result:', result);
+          } catch (err) {
+            console.error('[ElectronInit] Sign out error:', err);
+          }
+          setTimeout(updateElectronAuthStatus, 100);
+        } else {
+          // Show auth UI for sign in
+          console.log('[ElectronInit] Showing auth UI...');
+          const authUI = document.getElementById('authUI');
+          const mainApp = document.getElementById('mainApp');
+          if (authUI) authUI.style.display = 'flex';
+          if (mainApp) mainApp.style.display = 'none';
+        }
+      });
+    }
+    
+    // Initial update (delayed to let Supabase init)
+    setTimeout(updateElectronAuthStatus, 500);
+    
+    // Listen for auth state changes
+    window.addEventListener('authStateChanged', updateElectronAuthStatus);
+    
+    // Set up native menu handlers
+    efm.setupMenuHandlers({
+      onNewProject: async () => {
+        console.log('[ElectronInit] Menu: New Project');
+        
+        // Check free tier limit
+        const isPro = window.SupabaseAPI?.subscription?.isPro?.() || false;
+        if (!isPro) {
+          const files = await efm.getRecentFiles() || [];
+          if (files.length >= 3) {
+            alert('You have reached the 3 project limit for free accounts.\n\nTo create a new project, first remove a project from your recent list (right-click → Remove) or upgrade to Pro for unlimited projects.');
+            return;
+          }
+        }
+        
+        // Close current project first (reset to clean state)
+        if (window.UnifiedMenuBar && window.UnifiedMenuBar.resetToUntitled) {
+          window.UnifiedMenuBar.resetToUntitled();
+        }
+        // Create new via native dialog
+        const result = await efm.newProject();
+        if (result && result.success && window.loadStateFromData) {
+          await window.loadStateFromData(result.data);
+        }
+      },
+      
+      onOpen: async () => {
+        console.log('[ElectronInit] Menu: Open');
+        
+        // Check free tier limit
+        const isPro = window.SupabaseAPI?.subscription?.isPro?.() || false;
+        if (!isPro) {
+          const files = await efm.getRecentFiles() || [];
+          if (files.length >= 3) {
+            alert('You have reached the 3 project limit for free accounts.\n\nTo open a new file, first remove a project from your recent list (right-click → Remove) or upgrade to Pro for unlimited projects.');
+            return;
+          }
+        }
+        
+        await efm.openProject();
+      },
+      
+      onSave: async () => {
+        console.log('[ElectronInit] Menu: Save triggered');
+        try {
+          // Save current day data first
+          if (window.saveDayData) window.saveDayData();
+          
+          // In Electron, always use ElectronFileManager directly (skip ProjectManager which uses prompt())
+          if (window.collectFullState) {
+            console.log('[ElectronInit] Using collectFullState + efm.save');
+            const data = await window.collectFullState();
+            console.log('[ElectronInit] Data collected, media items:', data.vaultMedia?.length || 0);
+            const result = await efm.save(data);
+            console.log('[ElectronInit] Save result:', result);
+            
+            // Update unified menu bar with project info (especially after first save)
+            if (result && window.UnifiedMenuBar && window.UnifiedMenuBar.setCurrentProject) {
+              window.UnifiedMenuBar.setCurrentProject({
+                name: efm.getCurrentFileName(),
+                type: 'local',
+                path: efm.getCurrentFilePath()
+              });
+            }
+          } else {
+            console.error('[ElectronInit] collectFullState not available!');
+          }
+        } catch (e) {
+          console.error('[ElectronInit] Save error:', e);
+          alert('Save failed: ' + e.message);
+        }
+      },
+      
+      onSaveAs: async () => {
+        console.log('[ElectronInit] Menu: Save As triggered');
+        try {
+          // Save current day data first
+          if (window.saveDayData) window.saveDayData();
+          
+          if (window.collectFullState) {
+            console.log('[ElectronInit] Using collectFullState + efm.saveAs');
+            const data = await window.collectFullState();
+            console.log('[ElectronInit] Data collected, media items:', data.vaultMedia?.length || 0);
+            const result = await efm.saveAs(data);
+            console.log('[ElectronInit] SaveAs result:', result);
+            
+            // Update unified menu bar with new project info
+            if (result && window.UnifiedMenuBar && window.UnifiedMenuBar.setCurrentProject) {
+              window.UnifiedMenuBar.setCurrentProject({
+                name: efm.getCurrentFileName(),
+                type: 'local',
+                path: efm.getCurrentFilePath()
+              });
+            }
+          } else {
+            console.error('[ElectronInit] collectFullState not available!');
+          }
+        } catch (e) {
+          console.error('[ElectronInit] SaveAs error:', e);
+          alert('Save As failed: ' + e.message);
+        }
+      },
+      
+      onCloseProject: async () => {
+        console.log('[ElectronInit] Menu: Close Project');
+        
+        // Check for unsaved changes first
+        if (window.UnifiedMenuBar && window.UnifiedMenuBar.checkUnsavedChanges) {
+          const proceed = await window.UnifiedMenuBar.checkUnsavedChanges();
+          if (!proceed) return; // User cancelled
+        }
+        
+        await efm.closeProject();
+      },
+      
+      onExportPdf: () => {
+        console.log('[ElectronInit] Menu: Export PDF');
+        // Trigger PDF export button (opens settings modal)
+        const pdfBtn = document.getElementById('printBtn');
+        if (pdfBtn) pdfBtn.click();
+      },
+      
+      onExportExcel: () => {
+        console.log('[ElectronInit] Menu: Export Excel');
+        const excelBtn = document.querySelector('[data-action="export-excel"]') || 
+                         document.getElementById('excelBtn');
+        if (excelBtn) excelBtn.click();
+      },
+      
+      onUndo: () => {
+        console.log('[ElectronInit] Menu: Undo');
+        if (window.undo) window.undo();
+      },
+      
+      onRedo: () => {
+        console.log('[ElectronInit] Menu: Redo');
+        if (window.redo) window.redo();
+      },
+      
+      onHelp: () => {
+        console.log('[ElectronInit] Menu: Help');
+        window.open('quickstart.html', '_blank');
+      },
+      
+      onFileOpened: async (fileData) => {
+        console.log('[ElectronInit] File opened:', fileData.name);
+        
+        // Keep loading flag true through entire open process
+        window.__LOADING_FILE__ = true;
+        
+        try {
+          if (window.loadStateFromData) {
+            await window.loadStateFromData(fileData.data);
+          }
+          // Update current project name display
+          const nameEl = document.getElementById('currentProjectName');
+          if (nameEl) {
+            nameEl.textContent = fileData.name;
+          }
+          // Update project display
+          if (window.UnifiedMenuBar && window.UnifiedMenuBar.setCurrentProject) {
+            window.UnifiedMenuBar.setCurrentProject({
+              name: fileData.name,
+              filePath: fileData.path
+            });
+          }
+          // Update sidebar
+          if (window.ProjectSidebar && window.ProjectSidebar.updateCurrentProject) {
+            window.ProjectSidebar.updateCurrentProject({
+              name: fileData.name,
+              path: fileData.path
+            });
+          }
+        } finally {
+          // Small delay to let any final renders complete
+          setTimeout(() => {
+            window.__LOADING_FILE__ = false;
+          }, 500);
+        }
+      }
+    });
+    
+    // Sidebar handles its own initialization now - no need to refresh here
+    
+    // Override sidebar project functions to use Electron file manager
+    overrideSidebarFunctions();
+    
+    console.log('[ElectronInit] Initialization complete');
+  });
+  
+  // Load recent projects
+  async function loadRecentProjects() {
+    // Refresh the sidebar (it will fetch recent files internally)
+    if (window.ProjectSidebar && window.ProjectSidebar.refresh) {
+      window.ProjectSidebar.refresh();
+    }
+  }
+  
+  // Override sidebar project functions
+  function overrideSidebarFunctions() {
+    // The new sidebar handles its own events - nothing to override
+    console.log('[ElectronInit] Sidebar functions ready');
+  }
+  
+  // Expose save function for SAVE button
+  window.ElectronSave = async function() {
+    console.log('[ElectronInit] ElectronSave called');
+    try {
+      if (window.saveDayData) window.saveDayData();
+      
+      if (window.collectFullState && window.ElectronFileManager) {
+        const data = await window.collectFullState();
+        const result = await window.ElectronFileManager.save(data);
+        
+        if (result && window.UnifiedMenuBar && window.UnifiedMenuBar.setCurrentProject) {
+          window.UnifiedMenuBar.setCurrentProject({
+            name: window.ElectronFileManager.getCurrentFileName(),
+            type: 'local',
+            path: window.ElectronFileManager.getCurrentFilePath()
+          });
+        }
+        return result;
+      }
+    } catch (e) {
+      console.error('[ElectronInit] ElectronSave error:', e);
+      alert('Save failed: ' + e.message);
+    }
+  };
+  
+})();
