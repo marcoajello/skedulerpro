@@ -54,24 +54,46 @@
             margin: 0 auto;
         }
 
-        /* CTA Button */
+        /* CTA Buttons */
         .cta-section {
             text-align: center;
             padding: 40px 0 60px;
         }
 
-        .btn-download {
+        .beta-label {
             display: inline-block;
+            background-color: #ff5722;
+            color: #ffffff;
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 3px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .download-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .btn-download {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
             background-color: #d32f2f;
             color: #ffffff;
-            padding: 16px 48px;
-            font-size: 1.1rem;
+            padding: 16px 32px;
+            font-size: 1rem;
             font-weight: 600;
             text-decoration: none;
             border-radius: 4px;
             transition: background-color 0.2s ease, transform 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            min-width: 200px;
         }
 
         .btn-download:hover {
@@ -79,22 +101,38 @@
             transform: translateY(-2px);
         }
 
-        .beta-badge {
-            display: inline-block;
-            background-color: #ff5722;
-            color: #ffffff;
-            font-size: 0.7rem;
-            padding: 2px 8px;
-            border-radius: 3px;
-            margin-left: 8px;
-            vertical-align: middle;
-            font-weight: 700;
+        .btn-download .btn-title {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-download .btn-subtitle {
+            font-size: 0.75rem;
+            font-weight: 400;
+            opacity: 0.85;
+            margin-top: 4px;
         }
 
         .download-note {
             margin-top: 16px;
             font-size: 0.85rem;
             color: #666666;
+        }
+
+        .download-help {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: #555555;
+        }
+
+        .download-help a {
+            color: #888888;
+            text-decoration: underline;
+        }
+
+        .download-help a:hover {
+            color: #d32f2f;
         }
 
         /* Tutorials */
@@ -207,10 +245,18 @@
         </header>
 
         <section class="cta-section">
-            <a href="#" class="btn-download">
-                Download for macOS
-                <span class="beta-badge">BETA</span>
-            </a>
+            <span class="beta-label">Beta</span>
+            <div class="download-buttons">
+                <a href="https://github.com/marcoajello/skeduler_beta/releases/download/v1.3.0-beta/Skeduler-1.3.0-beta-arm64.dmg" class="btn-download">
+                    <span class="btn-title">Apple Silicon</span>
+                    <span class="btn-subtitle">M1, M2, M3 Macs</span>
+                </a>
+                <a href="https://github.com/marcoajello/skeduler_beta/releases/download/v1.3.0-beta/Skeduler-1.3.0-beta.dmg" class="btn-download">
+                    <span class="btn-title">Intel</span>
+                    <span class="btn-subtitle">Older Macs</span>
+                </a>
+            </div>
+            <p class="download-help">Not sure? Go to  > About This Mac to check your chip.</p>
             <p class="download-note">Windows version coming soon</p>
         </section>
 
