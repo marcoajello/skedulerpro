@@ -53,7 +53,7 @@
             max-width: 500px;
             width: 100%;
             height: auto;
-            margin-bottom: 40px;
+            margin-bottom: 2px;
         }
 
         .tagline {
@@ -152,6 +152,25 @@
             color: #d32f2f;
         }
 
+        .pricing-line {
+            font-size: 1.4rem;
+            color: #d32f2f;
+            margin-top: 24px;
+            margin-bottom: 8px;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .pricing-line strong {
+            color: #d32f2f;
+            font-weight: 700;
+        }
+
+        .pricing-line .pricing-detail {
+            font-size: 1.4rem;
+            color: #d32f2f;
+        }
+
         .beta-disclaimer {
             margin-top: 24px;
             font-size: 0.75rem;
@@ -160,6 +179,106 @@
             margin-left: auto;
             margin-right: auto;
             line-height: 1.5;
+        }
+
+        /* Demo Progression */
+        .demo-section {
+            text-align: center;
+            padding: 0 0 48px;
+            margin-top: -30px;
+        }
+
+        .demo-section h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .demo-section .demo-subtitle {
+            font-size: 1rem;
+            color: #999999;
+            margin-bottom: 36px;
+            font-weight: 400;
+        }
+
+        .demo-steps {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 0;
+        }
+
+        .demo-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 0 1 220px;
+        }
+
+        .demo-step img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #333;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        .demo-step-label {
+            margin-bottom: 10px;
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .demo-arrow {
+            display: flex;
+            align-items: center;
+            align-self: flex-start;
+            margin-top: 115px;
+            flex: 0 0 40px;
+            justify-content: center;
+            color: #d32f2f;
+            font-size: 1.4rem;
+        }
+
+        .demo-arrow svg {
+            width: 28px;
+            height: 28px;
+            fill: none;
+            stroke: #d32f2f;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        @media (max-width: 768px) {
+            .demo-steps {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+            .demo-step {
+                flex: 0 1 45%;
+            }
+            .demo-arrow {
+                padding-top: 0;
+                flex: 0 0 24px;
+            }
+            .demo-arrow svg {
+                width: 20px;
+                height: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .demo-step {
+                flex: 0 1 100%;
+            }
+            .demo-arrow {
+                transform: rotate(90deg);
+                padding-top: 0;
+            }
         }
 
         /* Tutorials */
@@ -284,6 +403,38 @@
             <p class="tagline">Professional production scheduling for film & TV commercials.</p>
         </header>
 
+        <section class="demo-section">
+            <h2>Stop cropping. Start skeduling.</h2>
+            <p class="demo-subtitle">From storyboard to schedule in under 5 minutes.</p>
+            <div class="demo-steps">
+                <div class="demo-step">
+                    <span class="demo-step-label">Import</span>
+                    <img src="step1.png" alt="Import storyboard">
+                </div>
+                <div class="demo-arrow">
+                    <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </div>
+                <div class="demo-step">
+                    <span class="demo-step-label">Group</span>
+                    <img src="step2.png" alt="AI groups shots">
+                </div>
+                <div class="demo-arrow">
+                    <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </div>
+                <div class="demo-step">
+                    <span class="demo-step-label">Map</span>
+                    <img src="step3.png" alt="Map columns">
+                </div>
+                <div class="demo-arrow">
+                    <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </div>
+                <div class="demo-step">
+                    <span class="demo-step-label">Schedule</span>
+                    <img src="step4.png" alt="Final schedule">
+                </div>
+            </div>
+        </section>
+
         <section class="cta-section">
             <span class="beta-label">Beta 2.3.0</span>
             <div class="download-buttons">
@@ -301,6 +452,7 @@
                 </a>
             </div>
             <p class="download-help">Mac: Go to  > About This Mac to check your chip.</p>
+            <p class="pricing-line"><strong>Try PRO free for 3 months</strong> <span class="pricing-detail">&mdash; then $19/month or $199/year</span></p>
             <p class="beta-disclaimer">Beta Software Notice: This is pre-release software. It may contain bugs and features may change. Back up your work. Use at your own risk.</p>
         </section>
 
