@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SkedulerPro - Professional Production Scheduling</title>
-    <meta name="description" content="Professional production scheduling for short form media.">
+    <meta name="description" content="Professional production scheduling.">
 
     <!-- Open Graph / Social Sharing -->
     <meta property="og:title" content="SkedulerPro">
-    <meta property="og:description" content="Professional production scheduling for short form media.">
+    <meta property="og:description" content="Professional production scheduling.">
     <meta property="og:image" content="https://www.skedulerpro.com/Skeduler_web_LOGO.png">
     <meta property="og:url" content="https://www.skedulerpro.com">
     <meta property="og:type" content="website">
@@ -16,7 +16,7 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="SkedulerPro">
-    <meta name="twitter:description" content="Professional production scheduling for short form media.">
+    <meta name="twitter:description" content="Professional production scheduling.">
     <meta name="twitter:image" content="https://www.skedulerpro.com/Skeduler_web_LOGO.png">
 
     <!-- Apple Touch Icon (for iOS home screen & iMessage previews) -->
@@ -184,11 +184,11 @@
         /* Demo Progression */
         .demo-section {
             text-align: center;
-            padding: 22px 24px 41px;
+            padding: 22px 42px 41px;
             margin-top: -24px;
             margin-bottom: 16px;
             background-color: #222222;
-            border: 1px solid #333333;
+            border: 3px solid #d32f2f;
             border-radius: 12px;
         }
 
@@ -218,7 +218,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            flex: 0 1 220px;
+            flex: 1 1 0;
         }
 
         .demo-step img {
@@ -277,12 +277,16 @@
         }
 
         @media (max-width: 480px) {
+            .demo-steps {
+                gap: 0;
+            }
             .demo-step {
                 flex: 0 1 100%;
             }
             .demo-arrow {
                 transform: rotate(90deg);
                 padding-top: 0;
+                margin: -8px 0;
             }
         }
 
@@ -405,7 +409,7 @@
     <div class="container">
         <header>
             <img src="Skeduler_web_LOGO.png" alt="SkedulerPro" class="logo">
-            <p class="tagline">Professional production scheduling for short form media.</p>
+            <p class="tagline">Professional production scheduling.</p>
         </header>
 
         <section class="demo-section">
