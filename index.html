@@ -43,8 +43,30 @@
             padding: 0 24px;
         }
 
+        /* Hero with background video */
+        .hero-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%);
+            opacity: 0.15;
+            z-index: 0;
+            object-fit: cover;
+        }
+
         /* Header */
         header {
+            position: relative;
+            z-index: 1;
             padding: 60px 0 40px;
             text-align: center;
         }
@@ -407,10 +429,15 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <img src="Skeduler_web_LOGO.png" alt="SkedulerPro" class="logo">
-            <p class="tagline">Professional production scheduling.</p>
-        </header>
+        <div class="hero-wrapper">
+            <video class="hero-video" autoplay loop muted playsinline>
+                <source src="hero-bg.mp4" type="video/mp4">
+            </video>
+            <header>
+                <img src="Skeduler_web_LOGO.png" alt="SkedulerPro" class="logo">
+                <p class="tagline">Professional production scheduling.</p>
+            </header>
+        </div>
 
         <section class="demo-section">
             <h2 class="demo-heading">Stop cropping. Start skeduling.</h2>
